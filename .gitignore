@@ -1,0 +1,7 @@
+# Ignore all markdown files in root
+/*.md
+
+# Node modules
+node_modules/
+package-lock.json
+backend/.env
