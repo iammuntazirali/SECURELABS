@@ -1,16 +1,37 @@
-# React + Vite
+# 🛡️ SECURELAB: Security Assessment Management System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**SECURELAB** is a centralized university laboratory management platform designed to streamline and monitor security audit workflows in a controlled academic environment. The system bridges the gap between Faculty, Teaching Assistants (TAs), and Students, allowing for structured security assessments and real-time performance tracking.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Project Overview
+The project implements a multi-role architecture, ensuring that each user level has specific responsibilities and dedicated views:
 
-## React Compiler
+* **Student Dashboard**: A module where students perform simulated security audits (SQLi, XSS, etc.) and log their findings.
+* **TA Dashboard**: A monitoring panel for Teaching Assistants to track live group activity and assign grades based on technical proficiency.
+* **Faculty Dashboard**: A high-level oversight panel for Faculty to manage TAs, track student attack history, and review overall lab performance.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## ✨ Key Features
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 👤 Role-Based Access Control
+* **Student Interface**: Features a "Start Attack" simulation with live hacker-style terminal logs.
+* **TA Interface**: Includes group-wise grading and the ability to review submitted vulnerabilities.
+* **Faculty Interface**: Provides a comprehensive view of TA-to-Group assignments and historical attack logs for every student group.
+
+### 🛠️ Educational Attack Vectors
+The system is designed to track and simulate several popular cybersecurity assessments:
+* **SQL Injection (SQLi)**: Evaluating database security and input sanitization.
+* **Cross-Site Scripting (XSS)**: Auditing frontend script injection vulnerabilities.
+* **Brute Force Simulation**: Analyzing authentication strength and credential security.
+
+---
+
+## 💻 Tech Stack
+* **Frontend**: React.js + Vite (High-performance development)
+* **Styling**: Tailwind CSS v4 (Premium dark-themed UI)
+* **Icons**: Lucide-React
+* **Routing**: React Router DOM v7 (Smooth navigation between dashboards)
+
+---
