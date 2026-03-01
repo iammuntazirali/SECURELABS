@@ -2,15 +2,14 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { authMiddleware } = require('../middleware/auth');
-
 const router = express.Router();
 
-// ========== SIGNUP ==========
+//--- signup ---//
 router.post('/signup', async (req, res) => {
     try {
         const { name, email, password, role } = req.body;
 
-        // Check if user already exists
+        //--- check if user already exists ---//
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({
@@ -19,10 +18,10 @@ router.post('/signup', async (req, res) => {
             });
         }
 
-        // Create new user
+        //--- create new user ---//
         const user = await User.create({ name, email, password, role });
 
-        // Generate JWT
+        //--- generate jwt ---//
         const token = jwt.sign(
             { id: user._id, email: user.email, role: user.role, name: user.name },
             process.env.JWT_SECRET,
@@ -48,12 +47,12 @@ router.post('/signup', async (req, res) => {
     }
 });
 
-// ========== LOGIN ==========
+//--- login ---//
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // Find user
+        //--- find user ---//
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(401).json({
@@ -62,7 +61,7 @@ router.post('/login', async (req, res) => {
             });
         }
 
-        // Compare password
+        //--- compare password ---//
         const isMatch = await user.comparePassword(password);
         if (!isMatch) {
             return res.status(401).json({
@@ -71,7 +70,7 @@ router.post('/login', async (req, res) => {
             });
         }
 
-        // Generate JWT
+        //--- generate jwt ---//
         const token = jwt.sign(
             { id: user._id, email: user.email, role: user.role, name: user.name },
             process.env.JWT_SECRET,
@@ -97,7 +96,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// ========== GET CURRENT USER ==========
+//--- get current user ---//
 router.get('/me', authMiddleware, async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');

@@ -4,7 +4,7 @@ const { authMiddleware, authorizeRoles } = require('../middleware/auth');
 
 const router = express.Router();
 
-// ========== GET ALL GROUPS ==========
+//--- get all groups ---//
 router.get('/', authMiddleware, async (req, res) => {
     try {
         const groups = await Group.find()
@@ -16,7 +16,7 @@ router.get('/', authMiddleware, async (req, res) => {
     }
 });
 
-// ========== CREATE GROUP (Faculty only) ==========
+//--- create group ---//
 router.post('/', authMiddleware, authorizeRoles('faculty'), async (req, res) => {
     try {
         const { groupId, lead, members, target, assignedTA } = req.body;
@@ -27,7 +27,7 @@ router.post('/', authMiddleware, authorizeRoles('faculty'), async (req, res) => 
     }
 });
 
-// ========== GRADE GROUP (TA) ==========
+//--- grade group ---//
 router.patch('/:id/grade', authMiddleware, authorizeRoles('ta', 'faculty'), async (req, res) => {
     try {
         const { score, feedback } = req.body;
@@ -43,7 +43,7 @@ router.patch('/:id/grade', authMiddleware, authorizeRoles('ta', 'faculty'), asyn
     }
 });
 
-// ========== ASSIGN TA TO GROUP (Faculty) ==========
+//--- assign ta to group ---//
 router.patch('/:id/assign-ta', authMiddleware, authorizeRoles('faculty'), async (req, res) => {
     try {
         const { taId } = req.body;
@@ -59,7 +59,7 @@ router.patch('/:id/assign-ta', authMiddleware, authorizeRoles('faculty'), async 
     }
 });
 
-// ========== SEED DEFAULT GROUPS ==========
+//--- seed default groups ---//
 router.post('/seed', authMiddleware, authorizeRoles('faculty'), async (req, res) => {
     try {
         const existing = await Group.countDocuments();

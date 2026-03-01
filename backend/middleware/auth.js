@@ -1,6 +1,7 @@
+//--- jwt ---//
 const jwt = require('jsonwebtoken');
 
-// Verify JWT token middleware
+//--- auth middleware ---//
 const authMiddleware = (req, res, next) => {
     const authHeader = req.headers.authorization;
 
@@ -15,7 +16,7 @@ const authMiddleware = (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded; // { id, email, role }
+        req.user = decoded;
         next();
     } catch (err) {
         return res.status(401).json({
@@ -25,7 +26,7 @@ const authMiddleware = (req, res, next) => {
     }
 };
 
-// Role-based access control
+//--- authorize roles ---//
 const authorizeRoles = (...roles) => {
     return (req, res, next) => {
         if (!roles.includes(req.user.role)) {

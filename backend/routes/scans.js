@@ -4,8 +4,7 @@ const { authMiddleware } = require('../middleware/auth');
 
 const router = express.Router();
 
-// ========== GET SCAN HISTORY ==========
-// GET /api/scans — get all scans for the logged-in user
+//--- get scan history ---//
 router.get('/', authMiddleware, async (req, res) => {
     try {
         const scans = await Scan.find({ user: req.user.id })
@@ -19,7 +18,7 @@ router.get('/', authMiddleware, async (req, res) => {
     }
 });
 
-// ========== GET SINGLE SCAN DETAILS ==========
+//--- get single scan details ---//
 router.get('/:id', authMiddleware, async (req, res) => {
     try {
         const scan = await Scan.findOne({ _id: req.params.id, user: req.user.id });

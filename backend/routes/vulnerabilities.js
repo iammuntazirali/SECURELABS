@@ -4,7 +4,7 @@ const { authMiddleware, authorizeRoles } = require('../middleware/auth');
 
 const router = express.Router();
 
-// ========== SUBMIT VULNERABILITY (Student) ==========
+//--- submit vulnerability ---//
 router.post('/', authMiddleware, async (req, res) => {
     try {
         const { attackType, severity, description, target } = req.body;
@@ -28,7 +28,7 @@ router.post('/', authMiddleware, async (req, res) => {
     }
 });
 
-// ========== GET MY VULNERABILITIES (Student) ==========
+//--- get my vulnerabilities ---//
 router.get('/mine', authMiddleware, async (req, res) => {
     try {
         const vulns = await Vulnerability.find({ user: req.user.id })
@@ -39,7 +39,7 @@ router.get('/mine', authMiddleware, async (req, res) => {
     }
 });
 
-// ========== GET ALL VULNERABILITIES (TA/Faculty) ==========
+//--- get all vulnerabilities ---//
 router.get('/', authMiddleware, authorizeRoles('ta', 'faculty'), async (req, res) => {
     try {
         const vulns = await Vulnerability.find()
@@ -51,7 +51,7 @@ router.get('/', authMiddleware, authorizeRoles('ta', 'faculty'), async (req, res
     }
 });
 
-// ========== REVIEW VULNERABILITY (TA) ==========
+//--- review vulnerability ---//
 router.patch('/:id/review', authMiddleware, authorizeRoles('ta', 'faculty'), async (req, res) => {
     try {
         const { status } = req.body; // 'Accepted' or 'Rejected'

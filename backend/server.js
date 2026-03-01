@@ -12,11 +12,12 @@ const vulnRoutes = require('./routes/vulnerabilities');
 const groupRoutes = require('./routes/groups');
 const Scan = require('./models/Scan');
 const { authMiddleware } = require('./middleware/auth');
-
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// ========== HTTP SERVER + SOCKET.IO ==========
+
+
+//--- http server + socket.io ---//
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
@@ -25,29 +26,32 @@ const io = new Server(server, {
     }
 });
 
-// Middleware
+
+
+//--- middleware ---//
 app.use(cors());
 app.use(express.json());
 
-// ========== MONGODB CONNECTION ==========
+
+//--- mongodb connection ---//
 mongoose.connect(process.env.MONGO_URI, {
     serverSelectionTimeoutMS: 5000,
     connectTimeoutMS: 10000,
 })
-    .then(() => console.log('✅ MongoDB Connected'))
+    .then(() => console.log('MongoDB Connected'))
     .catch(err => {
-        console.error('❌ MongoDB Connection Error:', err.message);
-        console.log('⚠️  Server will run without DB. Auth features will not work.');
+        console.error('MongoDB Connection Error:', err.message);
+        console.log('Server will run without DB. Auth features will not work.');
     });
 
-// ========== ROUTES ==========
+
+//--- routes ---//
 app.use('/api/auth', authRoutes);
 app.use('/api/scans', scanRoutes);
 app.use('/api/vulnerabilities', vulnRoutes);
 app.use('/api/groups', groupRoutes);
 
-
-// ========== SOCKET.IO AUTH + LIVE SCAN ==========
+//--- socket.io auth + live scan ---//
 io.use((socket, next) => {
     const token = socket.handshake.auth.token;
     if (!token) return next(new Error('Authentication required'));
@@ -64,7 +68,7 @@ io.on('connection', (socket) => {
     console.log(`[SOCKET] Connected: ${socket.user.email}`);
 
     socket.on('start-scan', ({ targetIp, scanType }) => {
-        // --- INPUT VALIDATION ---
+        //--- input validation ---//
         const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
         const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -77,7 +81,7 @@ io.on('connection', (socket) => {
             return;
         }
 
-        // --- BUILD NMAP ARGS ---
+        //--- build nmap ---//
         let nmapArgs;
         switch (scanType) {
             case 'quick': nmapArgs = ['-T4', '-F', targetIp]; break;
@@ -95,12 +99,12 @@ io.on('connection', (socket) => {
         let fullOutput = '';
         const nmap = spawn('nmap', nmapArgs, { timeout: 120000 });
 
-        // --- STREAM STDOUT LINE BY LINE ---
+        //--- stream stdout line by line ---//
         let buffer = '';
         nmap.stdout.on('data', (data) => {
             buffer += data.toString();
             const lines = buffer.split('\n');
-            buffer = lines.pop(); // keep incomplete line in buffer
+            buffer = lines.pop();
 
             for (const line of lines) {
                 if (line.trim()) {
@@ -131,7 +135,7 @@ io.on('connection', (socket) => {
 
             const parsed = parseNmapOutput(fullOutput);
 
-            // Save to DB
+            //--- save to db ---//
             Scan.create({
                 target: targetIp,
                 scanType: scanType || 'quick',
@@ -139,7 +143,6 @@ io.on('connection', (socket) => {
                 parsed,
                 user: socket.user.id
             }).catch(dbErr => console.error('[DB] Failed to save scan:', dbErr.message));
-
             socket.emit('scan-complete', {
                 success: true,
                 target: targetIp,
@@ -148,15 +151,12 @@ io.on('connection', (socket) => {
                 timestamp: new Date().toISOString(),
                 scannedBy: socket.user.email
             });
-
             console.log(`[SCAN] Complete for ${socket.user.email}: ${targetIp}`);
         });
-
         nmap.on('error', (err) => {
             socket.emit('scan-error', { error: `Failed to start nmap: ${err.message}` });
         });
     });
-
     socket.on('disconnect', () => {
         console.log(`[SOCKET] Disconnected: ${socket.user.email}`);
     });
@@ -175,7 +175,7 @@ function getLineColor(line) {
     return 'text-slate-400';
 }
 
-// ========== LEGACY REST SCAN API (fallback) ==========
+//--- legacy rest scan api  ---//
 app.post('/api/scan', authMiddleware, async (req, res) => {
     const { targetIp, scanType } = req.body;
 
@@ -221,7 +221,8 @@ app.post('/api/scan', authMiddleware, async (req, res) => {
     });
 });
 
-// ========== NMAP OUTPUT PARSER ==========
+//--- nmap output  ---//
+
 function parseNmapOutput(output) {
     const lines = output.split('\n');
     const ports = [];
@@ -256,7 +257,6 @@ function parseNmapOutput(output) {
             scanTime = line.trim();
         }
     }
-
     return {
         hostStatus,
         totalPorts: ports.length,
@@ -269,17 +269,17 @@ function parseNmapOutput(output) {
     };
 }
 
-// ========== HEALTH CHECK ==========
+//--- health check ---
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', message: 'SecureiX Backend Running 🛡️' });
+    res.json({ status: 'ok', message: 'SecureiX Backend Running' });
 });
 
-// ========== START SERVER (use `server` not `app` for socket.io) ==========
+//--- start server ---
 server.listen(PORT, () => {
-    console.log(`\n🛡️  SecureiX Backend running on http://localhost:${PORT}`);
-    console.log(`📡 Nmap API:  POST http://localhost:${PORT}/api/scan`);
-    console.log(`🔌 WebSocket: ws://localhost:${PORT} (live scan)`);
-    console.log(`🔐 Auth API:  POST http://localhost:${PORT}/api/auth/signup`);
-    console.log(`🔐 Auth API:  POST http://localhost:${PORT}/api/auth/login`);
-    console.log(`❤️  Health:    GET  http://localhost:${PORT}/api/health\n`);
+    console.log(`\n  SecureiX Backend running on http://localhost:${PORT}`);
+    console.log(` Nmap API:  POST http://localhost:${PORT}/api/scan`);
+    console.log(` WebSocket: ws://localhost:${PORT} (live scan)`);
+    console.log(` Auth API:  POST http://localhost:${PORT}/api/auth/signup`);
+    console.log(` Auth API:  POST http://localhost:${PORT}/api/auth/login`);
+    console.log(` Health:    GET  http://localhost:${PORT}/api/health\n`);
 });
