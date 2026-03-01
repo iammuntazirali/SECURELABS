@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  # ========== BACKEND ==========
+  backend:
+    build: ./backend
+    container_name: secureix-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb://mongo:27017/secureix
+      - JWT_SECRET=${JWT_SECRET:-supersecretkey123}
+    depends_on:
+      - mongo
+    restart: unless-stopped
+    networks:
+      - secureix-net
+
+  # ========== FRONTEND ==========
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:5000
+    container_name: secureix-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - secureix-net
+
+  # ========== MONGODB ==========
+  mongo:
+    image: mongo:7
+    container_name: secureix-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    restart: unless-stopped
+    networks:
+      - secureix-net
+
+volumes:
+  mongo-data:
+
+
+networks:
+  secureix-net:
+    driver: bridge
